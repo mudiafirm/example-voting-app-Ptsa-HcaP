@@ -15,7 +15,8 @@ spec:
         app: vote
     spec:
       containers:
-      - image: dockersamples/examplevotingapp_vote
+      - image: example-voting-app-ptsa-hcap-vote:k8s
+        imagePullPolicy: Never
         name: vote
         ports:
         - containerPort: 80
