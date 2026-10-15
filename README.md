@@ -31,6 +31,47 @@ A multi-service voting application used to practise Docker, Kubernetes, Helm, Te
 
 ![Voting application architecture](architecture.excalidraw.png)
 
+### Capstone delivery architecture
+
+The original diagram is preserved above. The editable Mermaid source is available at [`docs/architecture.mmd`](docs/architecture.mmd).
+
+```mermaid
+flowchart TB
+    Developer["Developer"] --> GitHub["GitHub Repository"]
+    GitHub --> Actions["GitHub Actions CI"]
+
+    Actions --> TFCheck["Terraform fmt and validate"]
+    Actions --> HelmCheck["Helm lint and template"]
+
+    TFCheck --> TF["Terraform Configuration"]
+    TF -. "Future provisioning; approval required" .-> AWS["AWS EC2 / Kubernetes Environment"]
+
+    HelmCheck --> Chart["Helm Chart: voting-app"]
+    Chart --> K8s["Kubernetes Cluster / Minikube"]
+
+    subgraph App["Voting Application"]
+        Vote["Vote: Python"] --> Redis[("Redis Queue")]
+        Redis --> Worker["Worker: .NET"]
+        Worker --> DB[("PostgreSQL")]
+        DB --> Result["Results: Node.js"]
+    end
+
+    K8s --> App
+    Compose["Docker Compose: Local Development"] --> App
+
+    subgraph Future["Planned: Observability and SRE"]
+        Metrics["Metrics and Dashboards"]
+        Logs["Centralized Logs"]
+        Alerts["Alerts, SLOs and Error Budget"]
+    end
+
+    App -. "To be implemented" .-> Future
+
+    classDef planned stroke-dasharray: 5 5
+    class AWS,Future,Metrics,Logs,Alerts planned
+```
+
+
 The application consists of:
 
 | Component | Purpose |
