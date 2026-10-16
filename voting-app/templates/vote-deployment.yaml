@@ -6,6 +6,11 @@ metadata:
     app: vote
 spec:
   replicas: {{ .Values.vote.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: vote
@@ -18,6 +23,23 @@ spec:
         - name: vote
           image: "{{ .Values.vote.image.repository }}:{{ .Values.vote.image.tag }}"
           imagePullPolicy: {{ .Values.vote.image.pullPolicy }}
+          env:
+            - name: PROMETHEUS_MULTIPROC_DIR
+              value: /tmp/prometheus_multiproc
+          volumeMounts:
+            - name: prometheus-multiproc
+              mountPath: /tmp/prometheus_multiproc
           ports:
             - name: vote
               containerPort: {{ .Values.vote.containerPort }}
+{{- if .Values.vote.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.vote.readinessProbe.path }}
+              port: vote
+            initialDelaySeconds: {{ .Values.vote.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.vote.readinessProbe.periodSeconds }}
+{{- end }}
+      volumes:
+        - name: prometheus-multiproc
+          emptyDir: {}

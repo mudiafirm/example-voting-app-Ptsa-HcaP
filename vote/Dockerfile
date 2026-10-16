@@ -22,11 +22,15 @@ CMD ["python", "app.py"]
 # final defines the stage that will bundle the application for production
 FROM base AS final
 
-# Copy our code from the current folder to the working directory inside the container
+# Copy application code and the multiprocess startup script
 COPY . .
+RUN chmod +x /usr/local/app/entrypoint.sh
 
-# Make port 80 available for links and/or publish
+# Share metrics files between Gunicorn workers
+ENV PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+
+# Make port 80 available
 EXPOSE 80
 
-# Define our command to be run when launching the container
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]
+# Prepare metrics storage, then launch Gunicorn
+ENTRYPOINT ["/usr/local/app/entrypoint.sh"]

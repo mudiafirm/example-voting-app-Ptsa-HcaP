@@ -5,6 +5,11 @@ vote:
     tag: k8s
     pullPolicy: Never
   containerPort: 80
+  readinessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 5
   service:
     type: NodePort
     port: 8080

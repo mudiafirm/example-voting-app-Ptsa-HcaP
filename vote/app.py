@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, make_response, g
+from flask import Flask, render_template, request, make_response, g, Response
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry, multiprocess
+import time
 from redis import Redis
 import os
 import socket
@@ -14,7 +16,48 @@ app = Flask(__name__)
 
 gunicorn_error_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers.extend(gunicorn_error_logger.handlers)
+
 app.logger.setLevel(logging.INFO)
+
+REQUEST_COUNT = Counter(
+    "vote_http_requests_total",
+    "Total HTTP requests handled by the Vote application",
+    ["method", "endpoint", "http_status"],
+)
+REQUEST_LATENCY = Histogram(
+    "vote_http_request_duration_seconds",
+    "HTTP request processing duration in seconds",
+    ["method", "endpoint"],
+)
+
+@app.before_request
+def start_request_timer():
+    g.request_start_time = time.perf_counter()
+
+@app.after_request
+def record_request_metrics(response):
+    if request.path != "/metrics":
+        endpoint = request.endpoint or request.path
+        REQUEST_COUNT.labels(
+            request.method, endpoint, str(response.status_code)
+        ).inc()
+
+        start_time = getattr(g, "request_start_time", None)
+        if start_time is not None:
+            REQUEST_LATENCY.labels(
+                request.method, endpoint
+            ).observe(time.perf_counter() - start_time)
+
+    return response
+
+@app.route("/metrics")
+def metrics():
+    registry = CollectorRegistry()
+    multiprocess.MultiProcessCollector(registry)
+    return Response(
+        generate_latest(registry),
+        mimetype=CONTENT_TYPE_LATEST,
+    )
 
 def get_redis():
     if not hasattr(g, 'redis'):
