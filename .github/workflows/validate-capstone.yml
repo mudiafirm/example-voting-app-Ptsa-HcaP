@@ -8,6 +8,14 @@ on:
       - 'terraform/**'
       - 'voting-app/**'
       - '.github/workflows/validate-capstone.yml'
+      - 'vote/**'
+      - 'result/**'
+      - 'worker/**'
+      - 'k8s-specifications/**'
+      - 'observability/**'
+      - 'docs/**'
+      - '.github/workflows/**'
+
   pull_request:
     branches:
       - main
@@ -15,6 +23,14 @@ on:
       - 'terraform/**'
       - 'voting-app/**'
       - '.github/workflows/validate-capstone.yml'
+      - 'vote/**'
+      - 'result/**'
+      - 'worker/**'
+      - 'k8s-specifications/**'
+      - 'observability/**'
+      - 'docs/**'
+      - '.github/workflows/**'
+
   workflow_dispatch:
 
 permissions:
