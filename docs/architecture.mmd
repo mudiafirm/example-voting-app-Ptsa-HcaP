@@ -1,4 +1,3 @@
-
 flowchart TB
     Developer["Developer"] --> GitHub["GitHub Repository"]
     GitHub --> Actions["GitHub Actions CI"]
@@ -13,7 +12,8 @@ flowchart TB
     Chart --> K8s["Kubernetes Cluster / Minikube"]
 
     subgraph App["Voting Application"]
-        Vote["Vote: Python"] --> Redis[("Redis Queue")]
+        Vote["Vote: Python"]
+        Vote --> Redis[("Redis Queue")]
         Redis --> Worker["Worker: .NET"]
         Worker --> DB[("PostgreSQL")]
         DB --> Result["Results: Node.js"]
@@ -22,13 +22,18 @@ flowchart TB
     K8s --> App
     Compose["Docker Compose: Local Development"] --> App
 
-    subgraph Future["Planned: Observability and SRE"]
-        Metrics["Metrics and Dashboards"]
-        Logs["Centralized Logs"]
-        Alerts["Alerts, SLOs and Error Budget"]
+    subgraph Observability["Observability and SRE"]
+        Prometheus["Prometheus: Local Monitoring"]
+        Queries["Request Rate, p95 Latency and SLO Queries"]
+        Alerts["HTTP 5xx Alert: >5% for 2 minutes"]
+        SLO["Proposed 99% SLO and 1% Error Budget"]
+        Logs["Centralized Logging: Planned"]
     end
 
-    App -. "To be implemented" .-> Future
+    Prometheus -. "Scrapes /metrics" .-> Vote
+    Prometheus --> Queries
+    Prometheus --> Alerts
+    Queries --> SLO
 
     classDef planned stroke-dasharray: 5 5
-    class AWS,Future,Metrics,Logs,Alerts planned
+    class AWS,Logs planned
