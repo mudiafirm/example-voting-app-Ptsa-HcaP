@@ -110,6 +110,12 @@ Open:
 - Voting application: http://localhost:8080
 - Results application: http://localhost:8081
 
+### Verification
+
+- Submitted a vote through the voting application at `http://localhost:8080`.
+- Confirmed that the submitted vote appeared on the results page at `http://localhost:8081`.
+- Verified the main voting flow across the application services.
+
 View logs:
 
 ```bash
@@ -283,12 +289,22 @@ Planned work includes:
 
 These items should be marked complete only after implementation and testing.
 
+### Prometheus Monitoring and Alerting
+
+- Prometheus collects HTTP request metrics from the Vote service.
+- Request-rate and p95 latency queries are available in `observability/prometheus/dashboard-queries.md`.
+- A proposed availability SLO is 99% successful HTTP requests over a rolling 30-day window, with a 1% error budget.
+- The `VotingAppHighHttp5xxRate` alert triggers when the HTTP 5xx error rate exceeds 5% for 2 minutes.
+- Current verification: the alert is loaded in Prometheus and is Inactive, indicating the threshold is not currently breached.
+- Prometheus is available locally at `http://localhost:9091`.
+- Alert notifications are not yet configured; Alertmanager integration remains future work.
+
 ## Project Status
 
 | Deliverable | Status |
 |---|---|
 | Forked application repository | Completed |
-| Docker Compose application | Tested |
+| Docker Compose application | Tested: vote submission and results display verified |
 | Kubernetes deployment on Minikube | Tested |
 | Helm chart validation | Passed |
 | Helm upgrade and rollback | Tested |
