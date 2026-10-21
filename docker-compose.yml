@@ -75,6 +75,16 @@ services:
     networks:
       - back-tier
 
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "127.0.0.1:9091:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/rules:/etc/prometheus/rules:ro
+    networks:
+      - front-tier
+
   # this service runs once to seed the database with votes
   # it won't run unless you specify the "seed" profile
   # docker compose --profile seed up -d

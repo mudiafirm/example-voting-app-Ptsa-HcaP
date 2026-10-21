@@ -52,10 +52,8 @@ def record_request_metrics(response):
 
 @app.route("/metrics")
 def metrics():
-    registry = CollectorRegistry()
-    multiprocess.MultiProcessCollector(registry)
     return Response(
-        generate_latest(registry),
+        generate_latest(),
         mimetype=CONTENT_TYPE_LATEST,
     )
 

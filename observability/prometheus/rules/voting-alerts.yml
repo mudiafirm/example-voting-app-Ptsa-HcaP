@@ -1,0 +1,18 @@
+groups:
+  - name: voting-app-alerts
+    rules:
+      - alert: VotingAppHighHttp5xxRate
+        expr: |
+          (
+            sum(rate(vote_http_requests_total{http_status=~"5.."}[5m]))
+            or vector(0)
+          )
+          /
+          clamp_min(sum(rate(vote_http_requests_total[5m])), 1e-9)
+          > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Voting app HTTP 5xx error rate is high"
+          description: "More than 5% of recorded Vote app requests returned HTTP 5xx responses for at least 2 minutes."
