@@ -67,3 +67,12 @@ For the proposed 99% availability SLO, the allowed error ratio is 1%.
   /
   clamp_min(sum(rate(vote_http_requests_total[1h])), 1e-9)
 ) / 0.01
+
+## Incident Drill: HTTP 5xx Alert
+
+- **Scenario:** Simulated an HTTP 500 incident using a temporary local-only test endpoint.
+- **Detection:** Prometheus transitioned `VotingAppHighHttp5xxRate` to Firing after the HTTP 5xx rate exceeded 5% for the configured 2-minute duration.
+- **Recovery:** Removed the temporary endpoint and rebuilt the Vote service.
+- **Verification:** The Vote page returned HTTP 200; the removed test endpoint returned HTTP 404.
+- **Impact:** Controlled local test only; no AWS or production environment involved.
+- **Lesson learned:** Prometheus alert rules can detect sustained HTTP 5xx errors. Future work includes notification delivery, a formal recovery-time measurement, and a fuller postmortem.
